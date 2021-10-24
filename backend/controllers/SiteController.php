@@ -122,7 +122,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
+     * Function to import employees through csv.
      *
      * @return string
      */
@@ -180,20 +180,14 @@ class SiteController extends Controller
                             }
                             $model_employees->department_id = $line[$model->column_department_id];
                             $model_employees->employee_age = $line[$model->column_employee_age];
-
                             $model_employees->date_of_birth = $line[$model->column_date_of_birth];
-
                             $model_employees->employee_name = $line[$model->column_employee_name];
-
                             $model_employees->employee_code = $line[$model->column_employee_code];
-
                             $model_employees->joining_date = $line[$model->column_joining_date];
-
                             $model_employees->created_at = date("Y-m-d H:i:s");
-
                             $model_employees->updated_at = date("Y-m-d H:i:s");
+                            $model_employees->user_id = Yii::$app->user->id;
 
-                            $model_employees->user_id = 1;
                             if($model_employees->validate())
                             {
                                 $department_data = Department::find()->WHERE(['department_slug'=>$model_employees->department_id])->one();
@@ -219,6 +213,13 @@ class SiteController extends Controller
                                 break;
                             }
                         }
+
+                        if(count($employee_array_for_batchinsert) > 20)
+                        {
+                            Yii::$app->session->setFlash('error', "Maximum 20 rows allowed on csv file");
+                            $error_occured = 1;
+                        }
+
                         if($error_occured == 0)
                         {
                             $connection = Yii::$app->db;
